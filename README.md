@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HANNAsNote
 
-## Getting Started
+생각, 문장, 단어를 놓치지 않고 캡쳐하는 나만의 ID 노트예요. 카테고리로 연결하고, 자유 배치 캔버스로 펼쳐 보고, 옵시디언 스타일 그래프로 연결고리를 확인할 수 있어요.
 
-First, run the development server:
+## 매일 사용하는 방법
+
+1. Finder에서 이 폴더(`HANNAsNote`) 안의 **`start.command`** 파일을 더블클릭하세요.
+2. 검은 터미널 창이 잠깐 뜨고, 잠시 후 브라우저가 자동으로 열려요.
+3. 다 쓰셨으면 그 터미널 창을 그냥 닫으시면 돼요. (안 닫아도 괜찮아요.)
+
+처음 실행할 때는 필요한 파일을 설치하느라 몇 분 정도 걸릴 수 있어요. 그 다음부터는 몇 초 안에 열려요.
+
+### "Node.js를 찾을 수 없어요" 라고 뜬다면
+
+이 컴퓨터에 아직 한 번도 설정을 안 한 상태예요. 이 메시지가 뜬 창을 그대로 캡쳐해서 도움을 요청해주세요.
+
+## 내 노트는 어디에 저장되나요?
+
+전부 이 폴더 안의 **`data`** 폴더에 저장돼요.
+
+- `data/notes.db` — 작성한 모든 노트, 카테고리, 연결 정보
+- `data/uploads` — 첨부한 사진들
+
+**백업하는 방법**: `HANNAsNote` 폴더 전체를 복사해서 외장 드라이브나 클라우드(예: iCloud Drive)에 붙여넣기만 하면 끝이에요. 계정도, 인터넷 연결도 필요 없어요 — 전부 이 컴퓨터 안에만 있어요.
+
+## 화면 구성
+
+- **캡쳐**: 생각이 떠오를 때 바로 적거나 사진을 첨부하는 곳. `⌘+Enter`로 빠르게 저장돼요.
+- **보드**: 노트들을 자유롭게 배치해서 코르크보드처럼 펼쳐보는 곳.
+- **그래프**: `[[노트 제목]]`으로 연결한 노트들이 어떻게 이어져 있는지 한눈에 보는 곳.
+- **검색**: 예전에 적어둔 내용을 바로 찾는 곳. 오늘/어제/이번 주로도 필터링할 수 있어요.
+- **카테고리**: 카테고리를 만들고 색상을 바꾸는 곳.
+
+## 노트 연결하기 ([[위키링크]])
+
+노트 내용에 `[[다른 노트 제목]]`처럼 적으면 자동으로 그 노트와 연결돼요. 아직 없는 제목이면 빈 노트가 자동으로 만들어지고, 나중에 열어서 내용을 채우면 돼요.
+
+---
+
+### (개발자용) 로컬 개발 환경
+
+Node.js와 npm이 필요해요 (`start.command`가 자동으로 nvm을 통해 처리해요). 자세한 아키텍처와 개발 관련 메모는 [CLAUDE.md](CLAUDE.md)를 참고하세요.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

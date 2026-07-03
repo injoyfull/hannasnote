@@ -18,6 +18,7 @@ export default function CaptureScreen({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function pickPhoto(file: File | null) {
@@ -28,6 +29,7 @@ export default function CaptureScreen({
   async function handleSave() {
     if (!content.trim() && !photoFile) return;
     setSaving(true);
+    setError(null);
     try {
       let imagePath: string | null = null;
       if (photoFile) {
@@ -37,7 +39,10 @@ export default function CaptureScreen({
           method: "POST",
           body: fd,
         });
-        if (!uploadRes.ok) throw new Error("upload failed");
+        if (!uploadRes.ok) {
+          const body = await uploadRes.json().catch(() => null);
+          throw new Error(body?.error || "사진 업로드에 실패했어요.");
+        }
         const uploaded = await uploadRes.json();
         imagePath = uploaded.imagePath;
       }
@@ -52,12 +57,14 @@ export default function CaptureScreen({
           categoryId,
         }),
       });
-      if (!res.ok) throw new Error("save failed");
+      if (!res.ok) throw new Error("저장에 실패했어요. 다시 시도해주세요.");
 
       setContent("");
       pickPhoto(null);
       setCategoryId(null);
       router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "저장에 실패했어요.");
     } finally {
       setSaving(false);
     }
@@ -122,6 +129,12 @@ export default function CaptureScreen({
           />
         ))}
       </div>
+
+      {error && (
+        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       <div className="mt-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">

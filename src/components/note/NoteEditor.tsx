@@ -22,17 +22,22 @@ export default function NoteEditor({
   const [categoryId, setCategoryId] = useState(initialCategoryId);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function save() {
     setSaving(true);
+    setError(null);
     try {
-      await fetch(`/api/notes/${noteId}`, {
+      const res = await fetch(`/api/notes/${noteId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content, categoryId }),
       });
+      if (!res.ok) throw new Error("저장에 실패했어요. 다시 시도해주세요.");
       setDirty(false);
       router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "저장에 실패했어요.");
     } finally {
       setSaving(false);
     }
@@ -79,6 +84,12 @@ export default function NoteEditor({
       >
         {saving ? "저장 중..." : dirty ? "저장 (⌘+Enter)" : "저장됨"}
       </button>
+
+      {error && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
