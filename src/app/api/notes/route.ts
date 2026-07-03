@@ -42,6 +42,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  let canvasX = body.canvasX;
+  let canvasY = body.canvasY;
+  if (typeof canvasX !== "number" || typeof canvasY !== "number") {
+    const existingCount = await prisma.note.count({ where: { isStub: false } });
+    const col = existingCount % 4;
+    const row = Math.floor(existingCount / 4);
+    canvasX = 40 + col * 260;
+    canvasY = 40 + row * 200;
+  }
+
   const note = await prisma.note.create({
     data: {
       type,
@@ -49,8 +59,8 @@ export async function POST(req: NextRequest) {
       content,
       imagePath,
       categoryId,
-      canvasX: typeof body.canvasX === "number" ? body.canvasX : 0,
-      canvasY: typeof body.canvasY === "number" ? body.canvasY : 0,
+      canvasX,
+      canvasY,
     },
     include: { category: true },
   });
