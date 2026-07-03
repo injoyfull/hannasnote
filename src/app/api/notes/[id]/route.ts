@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { unlink } from "node:fs/promises";
+import path from "node:path";
 import { prisma } from "@/lib/prisma";
 import { syncWikilinks } from "@/lib/wikilinks";
+
+const UPLOAD_DIR = path.join(process.cwd(), "data", "uploads");
 
 export async function GET(
   _req: NextRequest,
@@ -64,6 +68,16 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  await prisma.note.delete({ where: { id } });
+  const note = await prisma.note.delete({ where: { id } });
+
+  if (note.imagePath) {
+    const thumbPath = note.imagePath.replace(/(\.[a-z]+)$/i, "_thumb$1");
+    await Promise.all(
+      [note.imagePath, thumbPath].map((name) =>
+        unlink(path.join(UPLOAD_DIR, name)).catch(() => {}),
+      ),
+    );
+  }
+
   return NextResponse.json({ ok: true });
 }
