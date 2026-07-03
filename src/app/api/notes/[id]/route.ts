@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { syncWikilinks } from "@/lib/wikilinks";
 
 export async function GET(
   _req: NextRequest,
@@ -42,12 +43,18 @@ export async function PATCH(
   if (typeof body.canvasX === "number") data.canvasX = body.canvasX;
   if (typeof body.canvasY === "number") data.canvasY = body.canvasY;
   if (body.isStub === false) data.isStub = false;
+  if (typeof data.content === "string" && data.content.trim())
+    data.isStub = false;
 
   const note = await prisma.note.update({
     where: { id },
     data,
     include: { category: true },
   });
+
+  if (typeof data.content === "string") {
+    await syncWikilinks(note.id, data.content);
+  }
 
   return NextResponse.json(note);
 }

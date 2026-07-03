@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { syncWikilinks } from "@/lib/wikilinks";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -64,6 +65,8 @@ export async function POST(req: NextRequest) {
     },
     include: { category: true },
   });
+
+  if (content) await syncWikilinks(note.id, content);
 
   return NextResponse.json(note, { status: 201 });
 }
