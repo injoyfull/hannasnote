@@ -51,7 +51,7 @@ export default async function NoteDetailPage({
         </p>
       )}
 
-      <h1 className="mb-2 text-xl font-semibold text-[#3A3226]">
+      <h1 className="font-heading mb-2 text-2xl font-bold text-[#3A3226]">
         {note.title || "(제목 없음)"}
       </h1>
 
@@ -64,7 +64,7 @@ export default async function NoteDetailPage({
       )}
 
       {note.content && !note.isStub && (
-        <div className="prose prose-sm mb-4 max-w-none rounded-xl border border-black/10 bg-white/70 p-4 text-[#3A3226]">
+        <div className="note-content mb-4 rounded-xl border border-black/10 bg-white/70 p-4 text-[15px] text-[#3A3226]">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {renderedMarkdown}
           </ReactMarkdown>

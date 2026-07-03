@@ -15,24 +15,32 @@ export default function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 border-b border-black/10 bg-white/60 px-4 py-2 backdrop-blur">
-      {LINKS.map((link) => {
-        const active =
-          link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-        return (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-              active
-                ? "bg-blue-600 text-white"
-                : "text-zinc-700 hover:bg-zinc-100"
-            }`}
-          >
-            {link.label}
-          </Link>
-        );
-      })}
+    <nav className="flex items-center gap-3 border-b border-black/10 bg-[#FFFBEA]/80 px-4 py-2 backdrop-blur">
+      <Link
+        href="/"
+        className="font-heading mr-2 text-lg font-bold text-[#3A3226]"
+      >
+        HANNAsNote
+      </Link>
+      <div className="flex gap-1">
+        {LINKS.map((link) => {
+          const active =
+            link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                active
+                  ? "bg-[#4A6FA5] text-white"
+                  : "text-[#3A3226] hover:bg-black/5"
+              }`}
+            >
+              {link.label}
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }
