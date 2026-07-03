@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Note {
+  id         String   @id @default(cuid())
+  type       String   @default("text") // "text" | "photo"
+  title      String?
+  content    String? // markdown, may contain [[wikilinks]]
+  imagePath  String? // relative path under data/uploads/
+  categoryId String?
+  canvasX    Float    @default(0)
+  canvasY    Float    @default(0)
+  isStub     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  outgoingLinks Link[] @relation("source")
+  incomingLinks Link[] @relation("target")
+
+  @@index([categoryId])
+  @@index([createdAt])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String
+  createdAt DateTime @default(now())
+
+  notes Note[]
+}
+
+model Link {
+  id           String   @id @default(cuid())
+  sourceNoteId String
+  targetNoteId String
+  kind         String   @default("wikilink") // "wikilink" | "manual"
+  createdAt    DateTime @default(now())
+
+  sourceNote Note @relation("source", fields: [sourceNoteId], references: [id], onDelete: Cascade)
+  targetNote Note @relation("target", fields: [targetNoteId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceNoteId, targetNoteId, kind])
+}
