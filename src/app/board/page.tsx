@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import Canvas from "@/components/board/Canvas";
+import Canvas from "@/components/board/CanvasLoader";
 
 export default async function BoardPage() {
   const notes = await prisma.note.findMany({
@@ -9,7 +9,7 @@ export default async function BoardPage() {
   });
 
   return (
-    <main className="overflow-auto p-6">
+    <main className="overflow-auto">
       <Canvas notes={notes} />
     </main>
   );

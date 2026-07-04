@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ForceGraph2D, {
   type ForceGraphMethods,
   type NodeObject,
 } from "react-force-graph-2d";
+import Starfield, { COSMIC_BG } from "@/components/shared/Starfield";
 
 type GraphNode = {
   id: string;
@@ -30,8 +31,6 @@ function shade(hex: string, percent: number) {
   return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
 }
 
-type Star = { x: number; y: number; size: number; opacity: number };
-
 export default function GraphView({
   nodes,
   links,
@@ -46,17 +45,6 @@ export default function GraphView({
   const fgRef = useRef<ForceGraphMethods<NodeObject<GraphNode>> | undefined>(undefined);
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [hasCentered, setHasCentered] = useState(false);
-
-  const stars = useMemo<Star[]>(
-    () =>
-      Array.from({ length: 180 }, () => ({
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 1.8 + 0.4,
-        opacity: Math.random() * 0.7 + 0.15,
-      })),
-    [],
-  );
 
   useEffect(() => {
     const el = containerRef.current;
@@ -84,28 +72,9 @@ export default function GraphView({
     <div
       ref={containerRef}
       className="relative w-full overflow-hidden"
-      style={{
-        background: "linear-gradient(180deg, #0b1330 0%, #171247 55%, #241a3d 100%)",
-      }}
+      style={{ background: COSMIC_BG }}
     >
-      <div className="pointer-events-none absolute inset-0">
-        {stars.map((s, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: `${s.x}%`,
-              top: `${s.y}%`,
-              width: s.size,
-              height: s.size,
-              borderRadius: "50%",
-              background: "white",
-              opacity: s.opacity,
-              boxShadow: s.size > 1.5 ? "0 0 4px rgba(255,255,255,0.8)" : undefined,
-            }}
-          />
-        ))}
-      </div>
+      <Starfield />
 
       <ForceGraph2D
         ref={fgRef}

@@ -7,6 +7,7 @@ import {
   useDraggable,
   type DragEndEvent,
 } from "@dnd-kit/core";
+import Starfield, { COSMIC_BG } from "@/components/shared/Starfield";
 
 type Category = { id: string; name: string; color: string };
 type Note = {
@@ -22,9 +23,20 @@ type Note = {
 
 const CARD_WIDTH = 220;
 
+function hexToRgba(hex: string, alpha: number) {
+  const clean = hex.replace("#", "");
+  const n = parseInt(clean, 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function Card({ note }: { note: Note }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id: note.id });
+
+  const glow = note.category?.color ?? "#A8C5E8";
 
   const style: React.CSSProperties = {
     position: "absolute",
@@ -34,7 +46,9 @@ function Card({ note }: { note: Note }) {
     transform: transform
       ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
       : undefined,
-    backgroundColor: note.category?.color ?? "#FFFBEA",
+    background: `linear-gradient(160deg, ${hexToRgba(glow, 0.22)}, rgba(255,255,255,0.05))`,
+    borderColor: hexToRgba(glow, 0.55),
+    boxShadow: `0 0 22px ${hexToRgba(glow, 0.25)}, inset 0 0 16px rgba(255,255,255,0.04)`,
     zIndex: isDragging ? 50 : 1,
     cursor: isDragging ? "grabbing" : "grab",
   };
@@ -45,7 +59,7 @@ function Card({ note }: { note: Note }) {
       style={style}
       {...listeners}
       {...attributes}
-      className="rounded-2xl border border-black/10 p-3 shadow-sm hover:shadow-md transition-shadow select-none"
+      className="rounded-2xl border p-3 backdrop-blur-sm transition-shadow select-none hover:brightness-110"
     >
       {note.imagePath && (
         <img
@@ -56,7 +70,7 @@ function Card({ note }: { note: Note }) {
         />
       )}
       {note.content && (
-        <p className="text-sm text-[#3A3226] line-clamp-5 whitespace-pre-wrap">
+        <p className="text-sm text-[#FFFBEA] line-clamp-5 whitespace-pre-wrap">
           {note.title || note.content}
         </p>
       )}
@@ -64,7 +78,7 @@ function Card({ note }: { note: Note }) {
         href={`/note/${note.id}`}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
-        className="mt-2 inline-block text-xs text-[#4A6FA5] underline"
+        className="mt-2 inline-block text-xs text-[#A8C5E8] underline"
       >
         열기
       </a>
@@ -98,12 +112,16 @@ export default function Canvas({ notes: initialNotes }: { notes: Note[] }) {
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="relative min-h-[1400px] min-w-[1400px]">
+      <div
+        className="relative min-h-[1400px] min-w-[1400px]"
+        style={{ background: COSMIC_BG }}
+      >
+        <Starfield count={260} />
         {notes.map((note) => (
           <Card key={note.id} note={note} />
         ))}
         {notes.length === 0 && (
-          <p className="p-8 text-sm text-[#3A3226]/60">
+          <p className="relative p-8 text-sm text-[#FFFBEA]/60">
             아직 보드에 놓을 노트가 없습니다. 캡쳐 화면에서 먼저 기록해보세요.
           </p>
         )}
