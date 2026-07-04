@@ -58,11 +58,12 @@ export default function CaptureScreen({
         }),
       });
       if (!res.ok) throw new Error("저장에 실패했어요. 다시 시도해주세요.");
+      const note = await res.json();
 
       setContent("");
       pickPhoto(null);
       setCategoryId(null);
-      router.refresh();
+      router.push(`/graph?new=${note.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "저장에 실패했어요.");
     } finally {

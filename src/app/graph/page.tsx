@@ -1,7 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import GraphView from "@/components/graph/GraphViewLoader";
 
-export default async function GraphPage() {
+export default async function GraphPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ new?: string }>;
+}) {
+  const { new: highlightId } = await searchParams;
+
   const [notes, links] = await Promise.all([
     prisma.note.findMany({ include: { category: true } }),
     prisma.link.findMany(),
@@ -21,13 +27,13 @@ export default async function GraphPage() {
   }));
 
   return (
-    <main className="px-4 py-6">
+    <main>
       {graphNodes.length === 0 ? (
-        <p className="text-sm text-[#3A3226]/60">
+        <p className="p-6 text-sm text-[#3A3226]/60">
           아직 노트가 없습니다. 캡쳐 화면에서 먼저 기록해보세요.
         </p>
       ) : (
-        <GraphView nodes={graphNodes} links={graphLinks} />
+        <GraphView nodes={graphNodes} links={graphLinks} highlightId={highlightId} />
       )}
     </main>
   );
