@@ -7,6 +7,7 @@ import ForceGraph2D, {
   type NodeObject,
 } from "react-force-graph-2d";
 import Starfield, { COSMIC_BG } from "@/components/shared/Starfield";
+import { cosmicGradientStops, vividize } from "@/lib/color";
 
 type GraphNode = {
   id: string;
@@ -16,20 +17,6 @@ type GraphNode = {
   isStub: boolean;
 };
 type GraphLink = { source: string; target: string; kind: string };
-
-function hexToRgb(hex: string) {
-  const clean = hex.replace("#", "");
-  const n = parseInt(clean, 16);
-  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
-}
-
-function shade(hex: string, percent: number) {
-  const { r, g, b } = hexToRgb(hex);
-  const t = percent < 0 ? 0 : 255;
-  const p = Math.abs(percent);
-  const mix = (c: number) => Math.round((t - c) * p) + c;
-  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
-}
 
 export default function GraphView({
   nodes,
@@ -54,7 +41,7 @@ export default function GraphView({
       if (!el) return;
       setSize({
         width: el.clientWidth,
-        height: Math.max(500, window.innerHeight - 140),
+        height: Math.max(500, window.innerHeight - 190),
       });
     }
     updateSize();
@@ -86,13 +73,13 @@ export default function GraphView({
           (n as GraphNode).title || (n as GraphNode).content?.slice(0, 40) || ""
         }
         nodeRelSize={5}
-        linkColor={() => "rgba(168, 197, 232, 0.55)"}
+        linkColor={() => "rgba(224, 210, 200, 0.4)"}
         linkWidth={1}
         linkCurvature={0.2}
         linkDirectionalParticles={1}
         linkDirectionalParticleWidth={2}
         linkDirectionalParticleSpeed={0.004}
-        linkDirectionalParticleColor={() => "#A8C5E8"}
+        linkDirectionalParticleColor={() => "#F6D9A8"}
         linkDirectionalArrowLength={3}
         linkDirectionalArrowRelPos={1}
         backgroundColor="rgba(0,0,0,0)"
@@ -115,7 +102,9 @@ export default function GraphView({
           const label = n.title || n.content?.slice(0, 20) || "";
           const fontSize = 11 / globalScale;
           const isHighlighted = n.id === highlightId;
-          const radius = isHighlighted ? 7 : 5;
+          const radius = isHighlighted ? 8 : 6;
+          const vivid = vividize(n.color);
+          const { light, dark } = cosmicGradientStops(n.color);
 
           if (isHighlighted) {
             const pulse = 3 + Math.sin(Date.now() / 250) * 2;
@@ -134,12 +123,12 @@ export default function GraphView({
             y,
             radius,
           );
-          gradient.addColorStop(0, shade(n.color, 0.55));
-          gradient.addColorStop(1, shade(n.color, -0.25));
+          gradient.addColorStop(0, light);
+          gradient.addColorStop(1, dark);
 
           ctx.save();
-          ctx.shadowColor = n.color;
-          ctx.shadowBlur = isHighlighted ? 16 : 8;
+          ctx.shadowColor = vivid;
+          ctx.shadowBlur = isHighlighted ? 18 : 10;
           ctx.beginPath();
           ctx.arc(x, y, radius, 0, 2 * Math.PI);
           if (n.isStub) {
@@ -148,12 +137,15 @@ export default function GraphView({
             ctx.fill();
             ctx.globalAlpha = 1;
             ctx.setLineDash([2, 2]);
-            ctx.strokeStyle = n.color;
+            ctx.strokeStyle = vivid;
             ctx.stroke();
             ctx.setLineDash([]);
           } else {
             ctx.fillStyle = gradient;
             ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = vivid;
+            ctx.stroke();
           }
           ctx.restore();
 

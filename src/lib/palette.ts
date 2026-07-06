@@ -12,3 +12,8 @@ export const CATEGORY_PALETTE = [
 export function nextPaletteColor(existingCount: number): string {
   return CATEGORY_PALETTE[existingCount % CATEGORY_PALETTE.length];
 }
+
+/** Neutral gray for notes with no category — deliberately not a palette pastel,
+ * so "uncategorized" reads distinctly from any real category on both light and
+ * dark (board/graph) backgrounds. */
+export const UNCATEGORIZED_COLOR = "#9CA3AF";

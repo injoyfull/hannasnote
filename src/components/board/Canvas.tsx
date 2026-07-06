@@ -8,6 +8,8 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import Starfield, { COSMIC_BG } from "@/components/shared/Starfield";
+import { hexToRgba, vividize } from "@/lib/color";
+import { UNCATEGORIZED_COLOR } from "@/lib/palette";
 
 type Category = { id: string; name: string; color: string };
 type Note = {
@@ -23,20 +25,11 @@ type Note = {
 
 const CARD_WIDTH = 220;
 
-function hexToRgba(hex: string, alpha: number) {
-  const clean = hex.replace("#", "");
-  const n = parseInt(clean, 16);
-  const r = (n >> 16) & 255;
-  const g = (n >> 8) & 255;
-  const b = n & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 function Card({ note }: { note: Note }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id: note.id });
 
-  const glow = note.category?.color ?? "#A8C5E8";
+  const glow = vividize(note.category?.color ?? UNCATEGORIZED_COLOR);
 
   const style: React.CSSProperties = {
     position: "absolute",
@@ -46,9 +39,9 @@ function Card({ note }: { note: Note }) {
     transform: transform
       ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
       : undefined,
-    background: `linear-gradient(160deg, ${hexToRgba(glow, 0.22)}, rgba(255,255,255,0.05))`,
-    borderColor: hexToRgba(glow, 0.55),
-    boxShadow: `0 0 22px ${hexToRgba(glow, 0.25)}, inset 0 0 16px rgba(255,255,255,0.04)`,
+    background: `linear-gradient(160deg, ${hexToRgba(glow, 0.28)}, rgba(255,255,255,0.05))`,
+    borderColor: hexToRgba(glow, 0.6),
+    boxShadow: `0 0 22px ${hexToRgba(glow, 0.3)}, inset 0 0 16px rgba(255,255,255,0.04)`,
     zIndex: isDragging ? 50 : 1,
     cursor: isDragging ? "grabbing" : "grab",
   };
@@ -78,7 +71,7 @@ function Card({ note }: { note: Note }) {
         href={`/note/${note.id}`}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
-        className="mt-2 inline-block text-xs text-[#A8C5E8] underline"
+        className="mt-2 inline-block text-xs text-[#F0C987] underline"
       >
         열기
       </a>
