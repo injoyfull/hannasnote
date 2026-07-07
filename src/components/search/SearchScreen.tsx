@@ -11,6 +11,7 @@ import {
 } from "date-fns";
 import { ko } from "date-fns/locale";
 import CategoryChip from "@/components/shared/CategoryChip";
+import { noteThumbUrl } from "@/lib/images";
 
 type Category = { id: string; name: string; color: string };
 type Note = {
@@ -121,7 +122,7 @@ export default function SearchScreen({ categories }: { categories: Category[] })
             >
               {n.imagePath && (
                 <img
-                  src={`/api/uploads/${n.imagePath.replace(/(\.[a-z]+)$/i, "_thumb$1")}`}
+                  src={noteThumbUrl(n.imagePath)}
                   alt=""
                   className="h-10 w-10 rounded-lg object-cover"
                 />

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { unlink } from "node:fs/promises";
 import path from "node:path";
+import { del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { syncWikilinks } from "@/lib/wikilinks";
 
@@ -72,11 +73,21 @@ export async function DELETE(
 
   if (note.imagePath) {
     const thumbPath = note.imagePath.replace(/(\.[a-z]+)$/i, "_thumb$1");
-    await Promise.all(
-      [note.imagePath, thumbPath].map((name) =>
-        unlink(path.join(UPLOAD_DIR, name)).catch(() => {}),
-      ),
-    );
+    const targets = [note.imagePath, thumbPath];
+
+    if (/^https?:\/\//.test(note.imagePath)) {
+      // Cloud (Vercel Blob) — delete by URL.
+      if (process.env.BLOB_READ_WRITE_TOKEN) {
+        await del(targets).catch(() => {});
+      }
+    } else {
+      // Local dev filesystem.
+      await Promise.all(
+        targets.map((name) =>
+          unlink(path.join(UPLOAD_DIR, name)).catch(() => {}),
+        ),
+      );
+    }
   }
 
   return NextResponse.json({ ok: true });

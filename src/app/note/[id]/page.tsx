@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { renderWikilinksAsMarkdown } from "@/lib/wikilinks";
 import NoteEditor from "@/components/note/NoteEditor";
 import CategoryChip from "@/components/shared/CategoryChip";
+import { noteImageUrl } from "@/lib/images";
 
 export default async function NoteDetailPage({
   params,
@@ -57,7 +58,7 @@ export default async function NoteDetailPage({
 
       {note.imagePath && (
         <img
-          src={`/api/uploads/${note.imagePath}`}
+          src={noteImageUrl(note.imagePath)}
           alt=""
           className="mb-4 max-h-96 rounded-xl border border-black/10"
         />

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import CaptureScreen from "@/components/capture/CaptureScreen";
 import CategoryChip from "@/components/shared/CategoryChip";
+import { noteThumbUrl } from "@/lib/images";
 
 export default async function Home() {
   const [notes, categories] = await Promise.all([
@@ -30,7 +31,7 @@ export default async function Home() {
             >
               {n.imagePath && (
                 <img
-                  src={`/api/uploads/${n.imagePath.replace(/(\.[a-z]+)$/i, "_thumb$1")}`}
+                  src={noteThumbUrl(n.imagePath)}
                   alt=""
                   className="h-10 w-10 rounded-lg object-cover"
                 />

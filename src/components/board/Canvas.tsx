@@ -10,6 +10,7 @@ import {
 import Starfield, { COSMIC_BG } from "@/components/shared/Starfield";
 import { hexToRgba, vividize } from "@/lib/color";
 import { UNCATEGORIZED_COLOR } from "@/lib/palette";
+import { noteThumbUrl } from "@/lib/images";
 
 type Category = { id: string; name: string; color: string };
 type Note = {
@@ -56,7 +57,7 @@ function Card({ note }: { note: Note }) {
     >
       {note.imagePath && (
         <img
-          src={`/api/uploads/${note.imagePath.replace(/(\.[a-z]+)$/i, "_thumb$1")}`}
+          src={noteThumbUrl(note.imagePath)}
           alt=""
           className="mb-2 h-28 w-full rounded-lg object-cover"
           draggable={false}
