@@ -4,11 +4,15 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import { put } from "@vercel/blob";
+import { getApiUserId } from "@/lib/auth";
 
 const UPLOAD_DIR = path.join(process.cwd(), "data", "uploads");
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
+  const userId = await getApiUserId();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
   const formData = await req.formData();
   const file = formData.get("file");
 

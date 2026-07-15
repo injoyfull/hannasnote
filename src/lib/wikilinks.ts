@@ -32,29 +32,39 @@ export function extractWikilinkTitles(content: string | null): string[] {
   return [...titles];
 }
 
-async function resolveOrCreateStub(title: string): Promise<string> {
-  const existing = await prisma.$queryRaw<{ id: string }[]>`
-    SELECT id FROM "Note" WHERE title = ${title} COLLATE NOCASE LIMIT 1
-  `;
-  if (existing[0]) return existing[0].id;
+async function resolveOrCreateStub(
+  userId: string,
+  title: string,
+): Promise<string> {
+  // Case-insensitive title match, scoped to this user (Postgres mode:
+  // 'insensitive' replaces the old SQLite COLLATE NOCASE).
+  const existing = await prisma.note.findFirst({
+    where: { userId, title: { equals: title, mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (existing) return existing.id;
 
   const stub = await prisma.note.create({
-    data: { type: "text", title, isStub: true },
+    data: { userId, type: "text", title, isStub: true },
   });
   return stub.id;
 }
 
 /**
  * Keeps a note's outgoing wikilinks in sync with the [[Title]] references in
- * its content: resolves each title to a note (creating an empty stub if none
- * exists yet, Obsidian-style), then diffs against existing wikilink Links so
- * removed references stop showing up in backlinks/graph.
+ * its content: resolves each title to a note owned by the same user (creating
+ * an empty stub if none exists yet, Obsidian-style), then diffs against
+ * existing wikilink Links so removed references stop showing up.
  */
-export async function syncWikilinks(noteId: string, content: string | null) {
+export async function syncWikilinks(
+  userId: string,
+  noteId: string,
+  content: string | null,
+) {
   const titles = extractWikilinkTitles(content);
   const desiredTargetIds = new Set<string>();
   for (const title of titles) {
-    const targetId = await resolveOrCreateStub(title);
+    const targetId = await resolveOrCreateStub(userId, title);
     if (targetId !== noteId) desiredTargetIds.add(targetId);
   }
 
@@ -75,7 +85,7 @@ export async function syncWikilinks(noteId: string, content: string | null) {
     ...toDelete.map((l) => prisma.link.delete({ where: { id: l.id } })),
     ...toCreate.map((targetNoteId) =>
       prisma.link.create({
-        data: { sourceNoteId: noteId, targetNoteId, kind: "wikilink" },
+        data: { userId, sourceNoteId: noteId, targetNoteId, kind: "wikilink" },
       }),
     ),
   ]);

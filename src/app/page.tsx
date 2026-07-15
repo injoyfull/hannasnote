@@ -3,16 +3,21 @@ import { prisma } from "@/lib/prisma";
 import CaptureScreen from "@/components/capture/CaptureScreen";
 import CategoryChip from "@/components/shared/CategoryChip";
 import { noteThumbUrl } from "@/lib/images";
+import { requireUserId } from "@/lib/auth";
 
 export default async function Home() {
+  const userId = await requireUserId();
   const [notes, categories] = await Promise.all([
     prisma.note.findMany({
-      where: { isStub: false },
+      where: { userId, isStub: false },
       include: { category: true },
       orderBy: { createdAt: "desc" },
       take: 30,
     }),
-    prisma.category.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.category.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
 
   return (

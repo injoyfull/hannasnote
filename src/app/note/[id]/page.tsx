@@ -7,6 +7,7 @@ import { renderWikilinksAsMarkdown } from "@/lib/wikilinks";
 import NoteEditor from "@/components/note/NoteEditor";
 import CategoryChip from "@/components/shared/CategoryChip";
 import { noteImageUrl } from "@/lib/images";
+import { requireUserId } from "@/lib/auth";
 
 export default async function NoteDetailPage({
   params,
@@ -14,17 +15,21 @@ export default async function NoteDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const userId = await requireUserId();
 
   const [note, categories] = await Promise.all([
-    prisma.note.findUnique({
-      where: { id },
+    prisma.note.findFirst({
+      where: { id, userId },
       include: {
         category: true,
         incomingLinks: { include: { sourceNote: { include: { category: true } } } },
         outgoingLinks: { include: { targetNote: true } },
       },
     }),
-    prisma.category.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.category.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
 
   if (!note) notFound();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Star = { x: number; y: number; size: number; opacity: number };
 type Nebula = { x: number; y: number; size: number; color: string; opacity: number };
@@ -29,6 +29,14 @@ export default function Starfield({ count = 180 }: { count?: number }) {
       opacity: Math.random() * 0.12 + 0.08,
     })),
   );
+
+  // Render only after mount so the random positions never differ between the
+  // server-rendered HTML and the client (which would be a hydration mismatch).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) {
+    return <div className="pointer-events-none absolute inset-0 overflow-hidden" />;
+  }
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">

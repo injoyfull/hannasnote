@@ -4,6 +4,7 @@ import path from "node:path";
 import { del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { syncWikilinks } from "@/lib/wikilinks";
+import { getApiUserId } from "@/lib/auth";
 
 const UPLOAD_DIR = path.join(process.cwd(), "data", "uploads");
 
@@ -11,9 +12,12 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const userId = await getApiUserId();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
   const { id } = await params;
-  const note = await prisma.note.findUnique({
-    where: { id },
+  const note = await prisma.note.findFirst({
+    where: { id, userId },
     include: {
       category: true,
       incomingLinks: {
@@ -35,7 +39,14 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const userId = await getApiUserId();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
   const { id } = await params;
+  // Ownership check before mutating.
+  const owned = await prisma.note.findFirst({ where: { id, userId }, select: { id: true } });
+  if (!owned) return NextResponse.json({ error: "not found" }, { status: 404 });
+
   const body = await req.json();
   const data: Record<string, unknown> = {};
 
@@ -58,7 +69,7 @@ export async function PATCH(
   });
 
   if (typeof data.content === "string") {
-    await syncWikilinks(note.id, data.content);
+    await syncWikilinks(userId, note.id, data.content);
   }
 
   return NextResponse.json(note);
@@ -68,7 +79,13 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const userId = await getApiUserId();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
   const { id } = await params;
+  const owned = await prisma.note.findFirst({ where: { id, userId }, select: { id: true } });
+  if (!owned) return NextResponse.json({ error: "not found" }, { status: 404 });
+
   const note = await prisma.note.delete({ where: { id } });
 
   if (note.imagePath) {

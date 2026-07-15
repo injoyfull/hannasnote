@@ -14,6 +14,9 @@ const LINKS = [
 export default function Nav() {
   const pathname = usePathname();
 
+  // The login screen is full-bleed and has no nav.
+  if (pathname.startsWith("/login")) return null;
+
   return (
     <nav className="flex items-center gap-3 border-b border-black/10 bg-[#FFFBEA]/80 px-4 py-2 backdrop-blur">
       <Link
@@ -41,6 +44,14 @@ export default function Nav() {
           );
         })}
       </div>
+      <form action="/auth/signout" method="post" className="ml-auto">
+        <button
+          type="submit"
+          className="rounded-full px-3 py-1.5 text-sm font-medium text-[#3A3226]/60 transition-colors hover:bg-black/5 hover:text-[#3A3226]"
+        >
+          로그아웃
+        </button>
+      </form>
     </nav>
   );
 }

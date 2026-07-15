@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { syncWikilinks } from "@/lib/wikilinks";
+import { getApiUserId } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
+  const userId = await getApiUserId();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
   const { searchParams } = new URL(req.url);
   const categoryId = searchParams.get("categoryId");
   const since = searchParams.get("since"); // ISO date string
@@ -10,6 +14,7 @@ export async function GET(req: NextRequest) {
 
   const notes = await prisma.note.findMany({
     where: {
+      userId,
       isStub: false,
       ...(categoryId ? { categoryId } : {}),
       ...(since || until
@@ -29,6 +34,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const userId = await getApiUserId();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
   const body = await req.json();
   const type = body.type === "photo" ? "photo" : "text";
   const content = typeof body.content === "string" ? body.content : null;
@@ -46,7 +54,9 @@ export async function POST(req: NextRequest) {
   let canvasX = body.canvasX;
   let canvasY = body.canvasY;
   if (typeof canvasX !== "number" || typeof canvasY !== "number") {
-    const existingCount = await prisma.note.count({ where: { isStub: false } });
+    const existingCount = await prisma.note.count({
+      where: { userId, isStub: false },
+    });
     const col = existingCount % 4;
     const row = Math.floor(existingCount / 4);
     canvasX = 40 + col * 260;
@@ -55,6 +65,7 @@ export async function POST(req: NextRequest) {
 
   const note = await prisma.note.create({
     data: {
+      userId,
       type,
       title,
       content,
@@ -66,7 +77,7 @@ export async function POST(req: NextRequest) {
     include: { category: true },
   });
 
-  if (content) await syncWikilinks(note.id, content);
+  if (content) await syncWikilinks(userId, note.id, content);
 
   return NextResponse.json(note, { status: 201 });
 }

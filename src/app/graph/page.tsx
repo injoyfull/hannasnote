@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import GraphSection from "@/components/graph/GraphSection";
 import { UNCATEGORIZED_COLOR } from "@/lib/palette";
+import { requireUserId } from "@/lib/auth";
 
 export default async function GraphPage({
   searchParams,
@@ -8,10 +9,11 @@ export default async function GraphPage({
   searchParams: Promise<{ new?: string }>;
 }) {
   const { new: highlightId } = await searchParams;
+  const userId = await requireUserId();
 
   const [notes, links] = await Promise.all([
-    prisma.note.findMany({ include: { category: true } }),
-    prisma.link.findMany(),
+    prisma.note.findMany({ where: { userId }, include: { category: true } }),
+    prisma.link.findMany({ where: { userId } }),
   ]);
 
   const graphNodes = notes.map((n) => ({

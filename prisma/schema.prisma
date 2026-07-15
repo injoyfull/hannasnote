@@ -1,23 +1,22 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Note {
   id         String   @id @default(cuid())
+  userId     String // Supabase auth user id (owner)
   type       String   @default("text") // "text" | "photo"
   title      String?
   content    String? // markdown, may contain [[wikilinks]]
-  imagePath  String? // relative path under data/uploads/
+  imagePath  String? // bare filename (local) or full Blob URL (cloud)
   categoryId String?
   canvasX    Float    @default(0)
   canvasY    Float    @default(0)
@@ -30,21 +29,27 @@ model Note {
   outgoingLinks Link[] @relation("source")
   incomingLinks Link[] @relation("target")
 
+  @@index([userId])
   @@index([categoryId])
   @@index([createdAt])
 }
 
 model Category {
   id        String   @id @default(cuid())
-  name      String   @unique
+  userId    String // Supabase auth user id (owner)
+  name      String
   color     String
   createdAt DateTime @default(now())
 
   notes Note[]
+
+  @@unique([userId, name])
+  @@index([userId])
 }
 
 model Link {
   id           String   @id @default(cuid())
+  userId       String // Supabase auth user id (owner) — always matches the notes it joins
   sourceNoteId String
   targetNoteId String
   kind         String   @default("wikilink") // "wikilink" | "manual"
@@ -54,4 +59,5 @@ model Link {
   targetNote Note @relation("target", fields: [targetNoteId], references: [id], onDelete: Cascade)
 
   @@unique([sourceNoteId, targetNoteId, kind])
+  @@index([userId])
 }
